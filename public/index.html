@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Viewer</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta name="description" content="WebRTC Video Broadcast.">
+	<link rel="stylesheet" href="style.css" media="screen">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    </head>
+
+    <body>
+        
+         <div class="navbar">
+        <h1>Audio Streaming</h1>
+    </div>
+        <div class="lingkaran">
+            <h1 id="judul">Judul Lagu</h1>
+        </div>
+        <audio id="audio" autoplay></audio>
+
+    <div id="tracker">
+        <div id="progressbar">
+            <span id="progress"></span> 
+        </div>
+        <span id="duration"></span>
+    </div>
+
+     <input id="vol-control" type="range" min="0" max="100" step="1" value="100" oninput="SetVolume(this.value)" onchange="SetVolume(this.value)"></input>
+
+    <div class="clearfix"></div>
+        <div id="buttons">
+            <span>
+                <button id="play"></button>
+                <button id="pause"></button>
+            </span>
+        </div>
+
+            
+<!-- 
+                <div class="audio-player">
+                    
+                    <audio id="audio" autoplay></audio>                    
+                  
+        </div> -->
+    <script src="/index.js"></script>
+    <script src="/watch.js"></script>
+    <script type="text/javascript">
+
+        var time=0, waktu=0;
+        
+        var audios = document.getElementById('audio');
+        //Hide Pause Initially
+        $('#play').hide();
+            
+
+        //Play Button
+        $('#play').click(function(){
+            audios.play();
+            $('#play').hide();
+            $('#pause').show();
+
+        });
+
+        //Pause Button
+        $('#pause').click(function(){
+            audios.pause();
+            $('#pause').hide();
+            $('#play').show();
+        });
+
+
+        //Playlist Song Click
+        
+
+        //Volume Control
+        
+            
+        //Time Duration
+        function showDuration(time){
+            
+                var s = parseInt(time % 60);
+                var m = parseInt((time / 60) % 60);
+
+                if (s < 10) {
+                    s = '0' + s;
+                }
+                $('#duration').html(m + ':' + s);   
+                var value = 0;
+                if (time > 0) {
+                    value = ((100/waktu) * time).toFixed(3);
+                    value = value * 8;
+                    // console.log(value);
+                }
+                $('#progress').css('width',value + 'px');
+            
+        }
+
+    	function SetVolume(val)
+	    {
+	        var player = document.getElementById('audio');
+	        
+	        player.volume = val / 100;
+	        
+	    }
+
+        socket.on('play',function(){
+            console.log("Playing...");
+            location.reload(true);
+        });
+
+        socket.on('musicData',function(musicData){
+            console.log("Music Name : "+musicData.name);
+            console.log("Music Time END : "+musicData.timeEnd);
+            waktu=musicData.timeEnd;
+            
+
+            document.getElementById("judul").innerHTML=musicData.name;
+
+        })
+
+        socket.on('thistime',function(time){
+            time=time;
+            
+            showDuration(time);
+            
+        });
+
+        
+    </script>
+	
+
+</body>
+</html>
+
+

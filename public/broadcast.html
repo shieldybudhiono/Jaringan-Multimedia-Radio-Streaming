@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Live Audio Streaming</title>
+	<link rel="stylesheet" href="/main.css">
+
+
+	<script
+	  src="https://code.jquery.com/jquery-3.4.1.js"
+	  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+	  crossorigin="anonymous"></script>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/index.js"></script>
+	<script src="/broadcast.js"></script>
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  	<style type="text/css" media="screen">
+  		.disabled {
+  			background-color: grey;
+  		}
+  	</style>
+</head>
+<body>
+
+	<div id="bungkus">
+	
+		<h2 style="text-align: center; margin-top: 16px;">Lagu di Server</h2>
+			
+			<audio controls id="audio-server" playsinline class="mx-auto" preload="metadata">
+					<source src="" type="audio/mpeg">
+			</audio>
+		
+		<div id="list">
+			<div id="drop-area">
+		
+			  </div>
+			 
+			 <div id="progress">
+
+			</div>
+			  
+		</div>
+
+	</div>
+	
+
+	<script type="text/javascript">
+		
+		var listLagu = new Array();
+		var waktu;
+		var x=0;
+		var juragan;
+		var allTimeCurrent=0;
+		var currentTime;
+
+		var audioserver = document.getElementById('audio-server');
+	  	
+
+		audioserver.onloadedmetadata = function() {
+    		waktu = audioserver.duration;
+  			
+		};
+
+
+		audioserver.ontimeupdate = function() {checkDuration(); endedMusic();};
+		
+		function checkDuration(){
+			juragan=audioserver.currentTime;
+			socket.emit('thistime',juragan);
+			$('#progress').css('width',(allTimeCurrent+juragan)+'px');
+		}
+
+		function endedMusic(){
+			if (juragan >= waktu)
+			{
+				allTimeCurrent+=juragan+1;
+				x=x+1;
+				audioserver.setAttribute('src',URL.createObjectURL(listLagu[x]));
+				$('#musicItem'+x).addClass('disabled');
+				audioserver.play();
+				socket.emit('play');
+			}
+		}
+
+
+	    let dropArea = document.getElementById('drop-area');
+	    ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+	        dropArea.addEventListener(eventName, preventDefaults, false)
+	    })
+
+	    function preventDefaults (e) {
+	        e.preventDefault()
+	        e.stopPropagation()
+	    }
+	    
+	    dropArea.addEventListener('drop', handleDrop, false)
+
+	    function handleDrop(e) {
+	        let dt = e.dataTransfer
+	        let files = dt.files
+	        var a=0;
+	        while (a<files.length){
+	        	addMusic(files[a]);
+	        	a++;
+	        }
+	        
+	    }
+
+	    function addMusic(music){
+	    	var kotak = document.createElement('div');
+	    	var title = document.createElement('span');
+	    	title.setAttribute('id','judul');
+	    	title.innerHTML=music.name;
+	    	kotak.append(title);
+	    	kotak.setAttribute('class','musicItem');
+	    	var audio = document.createElement('audio');
+	        var url = URL.createObjectURL(music);
+	        audio.src=url;
+	        audio.addEventListener("loadedmetadata", function(_event) {
+	            var duration = audio.duration;
+	            kotak.style.width=duration + 'px';
+	            kotak.setAttribute('id','musicItem'+listLagu.length);
+	            $('#drop-area').append(kotak);
+	            
+	            
+	            if (listLagu.length==0) {
+	            	listLagu.push(music);
+	            	audioserver.setAttribute('src',URL.createObjectURL(listLagu[0]));
+	            	audioserver.load();
+					audioserver.play();		
+					socket.emit('play');	
+					$('#musicItem0').addClass('disabled');
+	            }
+	            else{
+	            	listLagu.push(music);
+	            }
+
+
+        		});
+	    }
+
+	    $( function() {
+		    $( "#drop-area" ).sortable({
+			    /*stop: function(event, ui) {
+			        alert("New position: " + ui.item.index());
+			    }*/
+			    start: function(e, ui) {
+			        // creates a temporary attribute on the element with the old index
+			        $(this).attr('data-previndex', ui.item.index());
+			    },
+			    update: function(e, ui) {
+			        // gets the new and old index then removes the temporary attribute
+			        var newIndex = ui.item.index();
+			        var oldIndex = $(this).attr('data-previndex');
+			        var element_id = ui.item.attr('id');
+			        var tempmusic;
+			        //alert('id of Item moved = '+element_id+' old position = '+oldIndex+' new position = '+newIndex);
+			        $(this).removeAttr('data-previndex');
+			        if(oldIndex>newIndex){
+			        	tempmusic = listLagu[oldIndex];
+			        	
+			        	for (var i = parseInt(oldIndex) ; i > newIndex ; i--) {
+			        		listLagu[i]=listLagu[i-1];
+			        	}
+			        	listLagu[newIndex]=tempmusic;
+			        }
+
+			        else{
+			        	tempmusic = listLagu[oldIndex];
+
+			        	for (var i = parseInt(oldIndex) ; i < newIndex ; i++) {
+			        		listLagu[i] = listLagu[i+1];
+			        	}
+			        	listLagu[newIndex]=tempmusic;
+			        }
+			        console.log(listLagu);
+			        var i=0;
+			        $('.musicItem').each(function(){
+			        	$(this).prop('id','musicItem'+i);
+			        	i++;
+			        });
+			        console.log($('.musicItem'));
+
+			    }
+			    // onDrop: function ($item, container, _super, event) {
+		     //        $('.example li').removeClass('dragged');
+		     //        $("body").removeClass('dragging');
+		     //        $('.example span').each(function (i) {
+		     //            var musicItem = i + 1;
+		     //            $(this).html(musicItem + '');
+		     //        });
+			});
+		    $('#drop-area').sortable({
+				items: 'div:not(.disabled)'
+			});
+			$('#drop-area').sortable({
+				cancel: '.disabled'
+			});
+		    $( "#drop-area" ).disableSelection();
+		  } );
+
+	</script>
+</body>
+</html>
+

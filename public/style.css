@@ -1,0 +1,99 @@
+html,body{
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.navbar h1{
+    text-align: center;
+}
+
+body{
+    background: url(img/482318_color-gradation-blur-backgrounds-iphone-6-wallpapers-download_1080x1920_h.jpg);
+    background-size: cover;
+}
+.lingkaran{
+    width:300px;
+    height:300px;
+    border-radius:50%;
+    overflow:hidden;
+    border: black solid 2px;
+    transform: translateX(-50%);
+    margin-left: 50%;
+    margin-right: 50%;
+    margin-bottom: 100px;
+}
+.lingkaran h1{
+    font-size: 20px;
+    text-align: center;
+    margin-top: 150px;
+    
+}
+
+#tracker{
+    position:relative;
+    width:100%;
+    display: flex;
+}
+
+#progressbar { 
+    width:800px;
+    margin-bottom:20px;
+    margin-top:5px;
+    height:10px;
+    background: url(img/Untitled-1.png) no-repeat;
+    margin-left: 20%;
+    
+ }
+ 
+#progress {
+    background: url(img/Untitled-2.png) no-repeat;
+    height:10px;
+    display:inline-block;
+ }
+
+#buttons{
+    width: 90%;
+    display: block;
+    margin: 15px auto;
+    margin-left: 50%;
+    margin-right: 50%;
+    transform: translateX(-5%);
+    overflow: auto;
+}
+
+button#play{
+    width: 70px;
+    height: 70px;
+    background: url(img/icons8-play-filled-50.png) no-repeat;
+    border: none;
+}
+
+button#pause{
+    width: 70px;
+    height: 70px;
+    background: url(img/icons8-pause-filled-50.png) no-repeat;
+    border: none;
+}
+
+.clearfix{
+    clear: both;
+}
+
+input#vol-contol{
+    
+    margin-top: -30px;
+}
+
+input#vol-control{
+    width: 10%;
+    margin-left: 20%;
+    -webkit-appearance: none !important;
+    background: rgb(0, 0, 0);
+    height: 2px;
+    margin-bottom: 20px;
+}
+
+#duration{
+    margin-left: 10px;
+}
+
